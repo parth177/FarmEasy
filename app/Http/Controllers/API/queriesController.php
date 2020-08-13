@@ -10,12 +10,21 @@ class queriesController extends Controller
 {
     public function show($id)
     {
-        $queries=queries::where('id',$id)->get()->toarray();
+        $queries=queriesModel::where('id',$id)->get()->toarray();
         if(!empty($queries))
         {
-            return response()->json(['queries'=>$queries]);
+            return response()->json(['queries'=>$queries],200);
         }
-        return response()->json(['Error'=>'Invalid id']);
+        return response()->json(['Error'=>'Invalid id'],500);
+    }
+    public function userShow($id)
+    {
+        $queries=queriesModel::where('sender',$id)->get()->toarray();
+        if(!empty($queries))
+        {
+            return response()->json(['queries'=>$queries],200);
+        }
+        return response()->json(['Error'=>'Query of this user not found'],400);
     }
     public function create(Request $req)
     {

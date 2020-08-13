@@ -18,6 +18,15 @@ class activitiesController extends Controller
         }
         return response()->json(['Error'=>'Invalid Id']);
     }
+    public function userShow($id)
+    {
+        $activities=activities::where('activity_by',$id)->get()->toarray();
+        if(!empty($activities))
+        {
+            return response()->json(['activities'=>$activities]);
+        }
+        return response()->json(['Error'=>'Activity Not found']);
+    }
     public function create(Request $req)
     {
         $validator = Validator::make($req->all(), [ 

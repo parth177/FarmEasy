@@ -21,6 +21,7 @@ class attendenceController extends Controller
             return response()->json(['Error'=>'Attendence not available']); 
         }
     }
+    
     public function create(Request $req)
     {
        
@@ -94,5 +95,8 @@ class attendenceController extends Controller
             }
             return response()->json(['error'=>'Record not found']);
         }
-
+        public function userShow($id)
+        {
+            
+        }
 }

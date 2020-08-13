@@ -18,6 +18,15 @@ class permitController extends Controller
         }
         return response()->json(['Error'=>'Invalid Id']);
     }
+    public function userShow($id)
+    {
+        $permit=permitModel::where('user_id',$id)->get()->toarray();
+        if(!empty($permit))
+        {
+            return response()->json(['permit'=>$permit],200);
+        }
+        return response()->json(['Error'=>'Permit not found'],400);
+    }
     public function create(Request $req)
     {
         $validator = Validator::make($req->all(), [ 

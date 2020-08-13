@@ -17,6 +17,7 @@ class newsController extends Controller
         }
         return response()->json(['Error'=>'Invalid Id']);
     }
+    
     public function create(Request $req)
     {
         $validator = Validator::make($req->all(), [ 

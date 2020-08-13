@@ -17,6 +17,24 @@ class notificationController extends Controller
         }
         return response()->json(['Error'=>'Invalid Id']);
     }
+    public function senderShow($id)
+    {
+        $notification=notificationModel::where('sender',$id)->get()->toarray();
+        if(!empty($notification))
+        {
+            return response()->json(['notification'=>$notification],200);
+        }
+        return response()->json(['Error'=>'Notification not found'],400);
+    }
+    public function receiverShow($id)
+    {
+        $notification=notificationModel::where('receiver',$id)->get()->toarray();
+        if(!empty($notification))
+        {
+            return response()->json(['notification'=>$notification],200);
+        }
+        return response()->json(['Error'=>'Notification not found'],400);
+    }
     public function create(Request $req)
     {
         $validator = Validator::make($req->all(), [ 

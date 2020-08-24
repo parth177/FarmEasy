@@ -9,6 +9,34 @@ use Validator;
 use App\order_detail;
 class orderController extends Controller
 {
+    public function create(Request $req)
+    {
+        $validator = Validator::make($req->all(), [ 
+            'user_id' => 'required|numeric', 
+            'vendor_id' => 'required|numeric',
+            'product_id' => 'required|numeric',
+            'qty'=>'required|numeric',
+            'tot_amount'=>'required|integer|min:1'
+        ]);
+        if ($validator->fails()) { 
+            return response()->json(['error'=>$validator->errors()], 401);            
+        }
+        $order= new orderModel;
+        $order->user_id=$req->user_id;
+        $order->vendor_id=$req->vendor_id;
+        $order->tracking_stat=1;
+        $order->isApproved=0;
+        $order->save();
+
+        $od = new order_detail;
+        $od->order_id=$order->id;
+        $od->product_id=$req->product_id;
+        $od->qty=$req->qty;
+        $od->tot_amount=$req->tot_amount;
+        $od->save();
+        return response()->json(['success'=>'Order placed Successfully'],200);
+
+    }
     public function updateStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [ 

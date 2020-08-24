@@ -59,6 +59,7 @@ route::get('User/notification/receiver/{id}','API\notificationController@receive
 route::delete('User/notification/delete/{id}','API\notificationController@delete');
 
 route::post('vendor/new/stock','API\stockController@create');
+route::post('vendor/new/order','API\orderController@create');
 route::post('vendor/update/orderSatus','API\orderController@updateStatus');
 route::post('vendor/update/order/isApproved','API\orderController@updateisApproved');
 route::get('vendor/history/{id}','API\orderController@history');

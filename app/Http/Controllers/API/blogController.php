@@ -16,6 +16,7 @@ class blogController extends Controller
         {
             return response()->json(['error'=>false,'blog'=>$blog], 200);
         }
+        return response()->json(['error'=>true,'blog'=>[]], 400);
     }
     public function new(Request $req)
     {

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\attendence;
 use Carbon\Carbon;
 use Validator;
+use App\myaccount;
 class attendenceController extends Controller
 {
     public function show($id)
@@ -95,8 +96,21 @@ class attendenceController extends Controller
             }
             return response()->json(['error'=>'Record not found']);
         }
-        public function userShow($id)
+       public function attendence($uid)
         {
-            
+            $uid=[$uid];
+            $attendence['myAttendence']=myaccount::join('attendance','attendance.user_id','my_account.user_id')->whereIn('my_account.user_id',$uid)->get()->toarray();
+            $att=array();
+            while($uid){
+                $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
+                $uid=null;
+                foreach($usr as $u)
+                {
+                    $uid[]=$u['user_id'];
+                    $att[]=$u['user_id'];
+                }
+            }
+            $attendence['lowerLevel']=myaccount::join('attendance','attendance.user_id','my_account.user_id')->whereIn('my_account.user_id',$att)->get()->toarray();
+            return response()->json(['error'=>false,'attendence'=>$attendence]);
         }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\activities;
 use Validator;
+use App\myaccount;
 
 class activitiesController extends Controller
 {
@@ -34,6 +35,8 @@ class activitiesController extends Controller
             'descr' => 'required', 
             'activity_by' => 'required', 
             'activity_to' => 'required', 
+            'activity_date'=>'required',
+            'activity_time'=>'required',
             'weather'=>'required',
             'elevation'=>'required',
             'lat'=>'required',
@@ -53,8 +56,9 @@ class activitiesController extends Controller
         $activities=new activities;
         $activities->title=$req->title;
         $activities->descr=$req->descr;
-        $activities->date=date('Y-m-d');
-        $activities->time=date('H:i:s');
+        // dd($req->activity_date);
+        $activities->date=date('Y-m-d',strtotime($req->activity_date));
+        $activities->time=date('H:i:s',strtotime($req->activity_time));
         $activities->activity_by=$req->activity_by;
         $activities->activity_to=$req->activity_to;
         $activities->isComplete=0;
@@ -128,6 +132,62 @@ class activitiesController extends Controller
             return response()->json(['success'=>'Record Deleted']);
         }
         return response()->json(['error'=>'Record not found']);
+    }
+    public function show2($id)
+    {
+         $uid=[$id];
+            $today['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('date',date('Y-m-d'))->select('activities.*')->get()->toarray();
+            $att=array();
+            while($uid){
+                $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
+                $uid=null;
+                foreach($usr as $u)
+                {
+                    $uid[]=$u['user_id'];
+                    $att[]=$u['user_id'];
+                }
+            }
+            $today['lowerLevel']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$att)->where('date',date('Y-m-d'))->select('activities.*')->get()->toarray();
+
+            $uid=[$id];
+            $tomorrow['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('date',date("Y-m-d", strtotime("+1 day")))->select('activities.*')->get()->toarray();
+            $att=array();
+            while($uid){
+                $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
+                $uid=null;
+                foreach($usr as $u)
+                {
+                    $uid[]=$u['user_id'];
+                    $att[]=$u['user_id'];
+                }
+            }
+            $tomorrow['lowerLevel']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$att)->where('date',date("Y-m-d", strtotime("+1 day")))->select('activities.*')->get()->toarray();
+            return response()->json(['error'=>false,'today'=>$today,'tomorrow'=>$tomorrow],200);
+    }
+    public function showdate($date,$uid)
+    {
+         $uid=[$uid];
+         $date=date('Y-m-d',strtotime($date));
+            $activities['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('date',$date)->select('activities.*')->get()->toarray();
+            $att=array();
+            while($uid){
+                $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
+                $uid=null;
+                foreach($usr as $u)
+                {
+                    $uid[]=$u['user_id'];
+                    $att[]=$u['user_id'];
+                }
+            }
+            $activities['lowerLevel']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$att)->where('date',$date)->select('activities.*')->get()->toarray();
+            return response()->json(['error'=>false,'activities'=>$activities],200);
+    }
+     public function showdate2($date,$uid)
+    {
+         $date=date('Y-m-d',strtotime($date));
+            $activities=myaccount::join('activities','activities.activity_by','my_account.user_id')->where('my_account.user_id',$uid)->where('date',$date)->select('activities.*')->get()->toarray();
+           
+            return response()->json(['error'=>false,'activities'=>$activities],200);
     }
 
 }

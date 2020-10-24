@@ -64,6 +64,24 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
         ],
+        'profile' => [
+            'driver' => 'local',
+            'root' => public_path('profilePhoto'),
+            'url' => env('APP_URL').'/profilePhoto',
+            'visibility' => 'public',
+        ],
+        'blog'=>[
+            'driver' => 'local',
+            'root' => public_path('blogImage'),
+            'url' => env('APP_URL').'/blogImage',
+            'visibility' => 'public',
+        ],
+        'permit'=>[
+            'driver' => 'local',
+            'root' => public_path('permitPhotos'),
+            'url' => env('APP_URL').'/permitPhotos',
+            'visibility' => 'public',
+        ]
 
     ],
 

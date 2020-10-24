@@ -93,4 +93,4 @@ route::post('edit/equipment/{eid}','API\equipmentController@edit');
 route::get('show/equipment/{fid}','API\equipmentController@show');
 route::delete('delete/equipment/{eid}','API\equipmentController@delete');
 
-route::post('add/resource','logInContoller@addResource');
+route::post('add/resource','API\logInContoller@addResource');

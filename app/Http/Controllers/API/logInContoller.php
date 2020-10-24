@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 use Illuminate\Support\Facades\Hash;
-
+use App\permitModel;
 class logInContoller extends Controller
 {
     public $successStatus = 200;
@@ -132,30 +132,49 @@ class logInContoller extends Controller
            'email'=>'required',
            'phone'=>'required',
            'address'=>'required',
-           'designation'=>'required'
+           'designation'=>'required',
+           'dob'=>'required',
+           'gender'=>'required',
+           'password'=>'required'
         ]);
+
         if ($validator->fails()) { 
             return response()->json(['error'=>true,'message'=>$validator->errors()], 401);            
-        }  
+        } 
+        if($req->permit)
+        {
+            $validator = Validator::make($req->all(), [ 
+               'permit_name'=>'required',
+            ]);
+            if ($validator->fails()) { 
+                return response()->json(['error'=>true,'message'=>$validator->errors()], 401);            
+            }
+        } 
+        
         $res=new myaccount;
         $res->name=$req->name;
         $res->u_type=$req->type;
-        $res->email->$req->email;
-        $res->password->$req->password;
+        $res->email=$req->email;
+        $res->password=$req->password;
         $res->mobile1=$req->phone;
         $res->address=$req->address;
         $res->designation_id=$req->designation;
-        $res->save();
+        $res->dob=date('Y-m-d',strtotime($req->dob));
+        $res->gender=$req->gender;
+        $res->date_time=date('Y-m-d H:i:s');
+        $res->save(); 
         if($req->permit)
         {
+            
             $pr=new permitModel;
-            $pr->user_id=$req->user_id;
-            $file=$request->file('permitPhotos');
+            $pr->user_id=$res->id;
+            $file=$req->file('permit');
             $name=time().".jpg";
             $file->move(public_path().'/permitPhotos/', $name);
             $pr->photopath=$name;
             $pr->name=$req->permit_name;
             $pr->save();
         }
+          return response()->json(['error'=>false,'message'=>'Resource added successfully..'], 200); 
     }
 }

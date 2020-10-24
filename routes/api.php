@@ -18,14 +18,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();  
 });
 Route::post('login', 'API\logInContoller@login');
-<<<<<<< HEAD
-Route::post('registration', 'API\loginContoller@register');
-=======
 Route::post('registration', 'API\logInContoller@register');
 route::get('user/profile/{uid}','API\logInContoller@profileView');
 route::post('user/profile/{uid}','API\logInContoller@update');
 route::post('user/password/reset','API\logInContoller@passReset');
->>>>>>> fe38f424bb714a69e248c7bca9a00a2029ae44d9
 
 route::post('User/attendence/new','API\attendenceController@create');
 route::post('User/attendence/update/{id}','API\attendenceController@update');
@@ -81,10 +77,6 @@ route::post('vendor/update/order/isApproved','API\orderController@updateisApprov
 route::get('vendor/history/{id}','API\orderController@history');
 
 route::get('supplies/{uid}','API\stockController@supplies');
-<<<<<<< HEAD
-route::post('add/output','API\outputController@new');
-route::get('view/output/{fid}','API\outputController@show');
-=======
 route::post('supplies/update/{sid}','API\stockController@update');
 route::delete('supplies/delete/{sid}','API\stockController@delete');
 
@@ -92,18 +84,13 @@ route::post('add/output','API\outputController@new');
 route::get('view/output/{fid}','API\outputController@show');
 route::delete('output/delete/{oid}','API\outputController@delete');
 route::post('output/update/{oid}','API\outputController@update');
->>>>>>> fe38f424bb714a69e248c7bca9a00a2029ae44d9
 
 route::post('add/farm','API\farmController@new');
 route::post('view/farm/{uid}','API\farmController@show');
 
-<<<<<<< HEAD
-route::post('add/equipment','API\equipmentController@new');
-=======
 route::post('add/equipment','API\equipmentController@new');
 route::post('edit/equipment/{eid}','API\equipmentController@edit');
 route::get('show/equipment/{fid}','API\equipmentController@show');
 route::delete('delete/equipment/{eid}','API\equipmentController@delete');
 
 route::post('add/resource','API\logInContoller@addResource');
->>>>>>> fe38f424bb714a69e248c7bca9a00a2029ae44d9

@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+    return $request->user();  
 });
-Route::post('login', 'API\loginContoller@login');
-// Route::post('registration', 'API\loginContoller@register');
+Route::post('login', 'API\logInContoller@login');
+Route::post('registration', 'API\loginContoller@register');
 
 route::post('User/attendence/new','API\attendenceController@create');
 route::post('User/attendence/update/{id}','API\attendenceController@update');
@@ -63,3 +63,12 @@ route::post('vendor/new/order','API\orderController@create');
 route::post('vendor/update/orderSatus','API\orderController@updateStatus');
 route::post('vendor/update/order/isApproved','API\orderController@updateisApproved');
 route::get('vendor/history/{id}','API\orderController@history');
+
+route::get('supplies/{uid}','API\stockController@supplies');
+route::post('add/output','API\outputController@new');
+route::get('view/output/{fid}','API\outputController@show');
+
+route::post('add/farm','API\farmController@new');
+route::post('view/farm/{uid}','API\farmController@show');
+
+route::post('add/equipment','API\equipmentController@new');

@@ -15,7 +15,7 @@ class orderController extends Controller
             'user_id' => 'required|numeric', 
             'vendor_id' => 'required|numeric',
             'product_id' => 'required|numeric',
-            'qty'=>'required|numeric',
+            'qty'=>'required|integer|min:1',
             'tot_amount'=>'required|integer|min:1'
         ]);
         if ($validator->fails()) { 

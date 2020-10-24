@@ -17,6 +17,7 @@ class stockController extends Controller
             'price' => 'required|numeric', 
             'amount'=> 'required|numeric',
             'count'=>'required|numeric',
+            'uid'=>'required',
             'remarks'=>'required',
 
         ]);
@@ -26,6 +27,7 @@ class stockController extends Controller
         $stock=new stock;
         $stock->item_name=$req->item_name;
         $stock->price=$req->price;
+        $stock->uid=$req->uid;
         $stock->save();
         
         $si=new stock_item;
@@ -36,5 +38,14 @@ class stockController extends Controller
         if($si->save())
         return response()->json(['success'=>'Stock Inserted successfully'],200);
 
+    }
+    public function supplies($uid)
+    {
+        $stock=stock::join('stock_item','stock_item.stock_id','stocks.id')->where('stocks.uid',$uid)->get()->toArray();
+        if($stock)
+        {
+            return response()->json(['error'=>false,'stock'=>$stock],200);
+        }
+        return response()->json(['error'=>true,'stock'=>[]],400);
     }
 }

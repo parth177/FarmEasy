@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class orderModel extends Model
+class farm extends Model
 {
-    protected $table="orders";
+    //
 }

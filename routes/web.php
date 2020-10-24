@@ -16,3 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('equiepment/{name}', 'ImageController@equ');
+Route::get('profile/{name}', 'ImageController@profile');

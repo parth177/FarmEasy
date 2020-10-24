@@ -17,17 +17,29 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::post('login', 'API\loginContoller@login');
-// Route::post('registration', 'API\loginContoller@register');
+Route::post('login', 'API\logInContoller@login');
+Route::post('registration', 'API\logInContoller@register');
+route::get('user/profile/{uid}','API\logInContoller@profileView');
+route::post('user/profile/{uid}','API\logInContoller@update');
+route::post('user/password/reset','API\logInContoller@passReset');
 
 route::post('User/attendence/new','API\attendenceController@create');
 route::post('User/attendence/update/{id}','API\attendenceController@update');
 route::get('User/attendence/show/{id}','API\attendenceController@show');
-
+route::get('attendence/{uid}','API\attendenceController@attendence');
 route::delete('User/attendence/delete/{id}','API\attendenceController@delete');
+
+
+route::post('blog/new','API\blogController@new');
+route::post('blog/update/{bid}','API\blogController@update');
+route::delete('blog/delete/{bid}','API\blogController@delete');
+route::get('blog/list/{uid}','API\blogController@show');
 
 route::post('User/activities/new','API\activitiesController@create');
 route::post('User/activities/update/{id}','API\activitiesController@update');
+route::get('activities/{uid}','API\activitiesController@show2');
+route::get('activities/{date}/{uid}','API\activitiesController@showdate');
+route::get('activities/self/{date}/{uid}','API\activitiesController@showdate2');
 route::get('User/activities/show/{id}','API\activitiesController@show');
 route::get('User/activities/show/user/{id}','API\activitiesController@userShow');
 route::delete('User/activities/delete/{id}','API\activitiesController@delete');
@@ -59,6 +71,26 @@ route::get('User/notification/receiver/{id}','API\notificationController@receive
 route::delete('User/notification/delete/{id}','API\notificationController@delete');
 
 route::post('vendor/new/stock','API\stockController@create');
+route::post('vendor/new/order','API\orderController@create');
 route::post('vendor/update/orderSatus','API\orderController@updateStatus');
 route::post('vendor/update/order/isApproved','API\orderController@updateisApproved');
 route::get('vendor/history/{id}','API\orderController@history');
+
+route::get('supplies/{uid}','API\stockController@supplies');
+route::post('supplies/update/{sid}','API\stockController@update');
+route::delete('supplies/delete/{sid}','API\stockController@delete');
+
+route::post('add/output','API\outputController@new');
+route::get('view/output/{fid}','API\outputController@show');
+route::delete('output/delete/{oid}','API\outputController@delete');
+route::post('output/update/{oid}','API\outputController@update');
+
+route::post('add/farm','API\farmController@new');
+route::post('view/farm/{uid}','API\farmController@show');
+
+route::post('add/equipment','API\equipmentController@new');
+route::post('edit/equipment/{eid}','API\equipmentController@edit');
+route::get('show/equipment/{fid}','API\equipmentController@show');
+route::delete('delete/equipment/{eid}','API\equipmentController@delete');
+
+route::post('add/resource','logInContoller@addResource');

@@ -153,7 +153,9 @@ class logInContoller extends Controller
             $file=$request->file('permitPhotos');
             $name=time().".jpg";
             $file->move(public_path().'/permitPhotos/', $name);
+            $pr->photopath=$name;
             $pr->name=$req->permit_name;
+            $pr->save();
         }
     }
 }

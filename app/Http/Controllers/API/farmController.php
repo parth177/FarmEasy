@@ -15,7 +15,8 @@ class farmController extends Controller
             'uid'=>'required',
             'name'=>'required',
             'lng'=>'required',
-            'lat'=>'required'
+            'lat'=>'required',
+            'address'=>'required'
         ]);
         if ($validator->fails()) { 
             return response()->json(['error'=>$validator->errors()], 401);            
@@ -25,6 +26,7 @@ class farmController extends Controller
         $farm->name=$req->name;
         $farm->lng=$req->lng;
         $farm->lat=$req->lat;
+        $farm->address=$req->address;
         if($farm->save())
         {
             return response()->json(['error'=>false,'message'=>'farm added..'], 200);            

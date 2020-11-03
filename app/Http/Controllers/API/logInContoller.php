@@ -4,10 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\User; 
+use App\User;
 use App\myaccount;
-use Illuminate\Support\Facades\Storage; 
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Validator;
 use Illuminate\Support\Facades\Hash;
 use App\permitModel;
@@ -18,22 +18,52 @@ class logInContoller extends Controller
     {
         $psw=request('password');
         $user=myaccount::where([['email',request('email')],['password',$psw]])->count();
-        if($user==1){ 
-            $user = myaccount::where('email',request('email'))->get()->toarray(); 
-            // $success['token'] =  $user->createToken('MyApp')-> accessToken; 
-            // $user = Auth::user(); 
-            return response()->json(['success' => $user], $this-> successStatus); 
-        } 
-        else{ 
-            return response()->json(['error'=>'Unauthorised'], 401); 
+        if($user==1){
+            $user = myaccount::where('email',request('email'))->get()->toarray();
+            // $success['token'] =  $user->createToken('MyApp')-> accessToken;
+            // $user = Auth::user();
+            return response()->json(['success' => $user], $this-> successStatus);
+        }
+        else{
+            return response()->json(['error'=>'Unauthorised'], 401);
         }
     }
-    public function register(Request $request) 
-    { 
-        $validator = Validator::make($request->all(), [ 
-            'name' => 'required', 
-            'email' => 'required|email|unique:my_account', 
-            'password' => 'required', 
+    public function socialLogin(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'email'=>'required',
+            'name'=>'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error'=>true,'message'=>$validator->errors()], 200);
+        }
+        $usr=myaccount::where([['email',$req->email],['name',$req->name]])->get()->toarray();
+        if($usr)
+        {
+            return response()->json(['error'=>false,'isNew'=>false,'success' => $usr], $this-> successStatus);
+        }
+        $validator = Validator::make($req->all(), [
+            'email'=>'unique:my_account',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error'=>true,'message'=>$validator->errors()], 200);
+        }
+        $usr= new myaccount;
+        $usr->name=$req->name;
+        $usr->email=$req->email;
+        $usr->password=uniqid();
+        $usr->isSocial=1;
+        $usr->date_time=date('Y-m-d H:i:s');
+        $usr->save();
+        $usr=myaccount::where('user_id',$usr->id)->first();
+        return response()->json(['error'=>false,'isNew'=>true,'success' => $usr], $this-> successStatus);
+    }
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|email|unique:my_account',
+            'password' => 'required',
             'mobile1'=>'required|digits:10|unique:my_account',
             'dob'=>'required',
             'address'=>'required',
@@ -42,12 +72,12 @@ class logInContoller extends Controller
             'lat'=>'required',
             'type_id'=>'required',
         ]);
-        if ($validator->fails()) { 
+        if ($validator->fails()) {
                     $success['error'] =  true;
                     $success['msg'] = 'Mobile or Email already in use try different one..';
-                    return response()->json(['error'=>$success], 200);            
+                    return response()->json(['error'=>$success], 200);
                 }
-        $input = $request->all(); 
+        $input = $request->all();
         if ($request->profile) {
             if ($request->hasfile('profile')) {
                 $file=$request->file('profile');
@@ -56,14 +86,14 @@ class logInContoller extends Controller
                 $input['profile']=$name;
             }
         }
-        $input['password'] = $request->password; 
+        $input['password'] = $request->password;
         $input['dob']=date('Y-m-d H:i:s',strtotime($request->dob));
         $input['designation_id']=$request->type_id;
         $input['date_time']=date('Y-m-d H:i:s');
-        $user = myaccount::create($input); 
-        // $success['token'] =  $user->createToken('MyApp')->accessToken; 
+        $user = myaccount::create($input);
+        // $success['token'] =  $user->createToken('MyApp')->accessToken;
         $success['name'] =  $user->name;
-        return response()->json(['success'=> $success], $this-> successStatus); 
+        return response()->json(['success'=> $success], $this-> successStatus);
     }
     public function profileView($uid)
     {
@@ -78,9 +108,7 @@ class logInContoller extends Controller
     }
     public function update(Request $request,$uid)
     {
-        $validator = Validator::make($request->all(), [ 
-            'name' => 'required', 
-            'email' => 'required|email', 
+        $validator = Validator::make($request->all(), [
             'mobile1'=>'required|digits:10',
             'dob'=>'required',
             'address'=>'required',
@@ -88,11 +116,11 @@ class logInContoller extends Controller
             'lng'=>'required',
             'lat'=>'required',
         ]);
-        if ($validator->fails()) { 
-            return response()->json(['error'=>true,'message'=>$validator->errors()], 401);            
+        if ($validator->fails()) {
+            return response()->json(['error'=>true,'message'=>$validator->errors()], 401);
         }
-        $input = $request->all(); 
-        if ($request->profile) 
+        $input = $request->all();
+        if ($request->profile)
         {
             $u=myaccount::where('user_id',$uid)->first();
             if(Storage::disk('profile')->exists($u->profile))
@@ -107,26 +135,27 @@ class logInContoller extends Controller
                 // dd($name);
             }
         }
+
         $input['dob']=date('Y-m-d H:i:s',strtotime($request->dob));
         $user = myaccount::where('user_id',$uid)->update($input);
         return response()->json(['error'=>false,'message'=>'profile updated'], 200);
     }
     public function passReset(Request $req)
     {
-        $validator = Validator::make($req->all(), [ 
+        $validator = Validator::make($req->all(), [
            'uid'=>'required',
            'newpass'=>'required'
         ]);
-        if ($validator->fails()) { 
-            return response()->json(['error'=>true,'message'=>$validator->errors()], 401);            
-        }        
+        if ($validator->fails()) {
+            return response()->json(['error'=>true,'message'=>$validator->errors()], 401);
+        }
         $user=myaccount::where('user_id',$req->uid)->update(['password'=>$req->newpass]);
-            return response()->json(['error'=>false,'message'=>'Password changed..'], 200); 
-        
+            return response()->json(['error'=>false,'message'=>'Password changed..'], 200);
+
     }
     public function addResource(Request $req)
     {
-        $validator = Validator::make($req->all(), [ 
+        $validator = Validator::make($req->all(), [
            'name'=>'required',
            'type'=>'required',
            'email'=>'required',
@@ -138,19 +167,19 @@ class logInContoller extends Controller
            'password'=>'required'
         ]);
 
-        if ($validator->fails()) { 
-            return response()->json(['error'=>true,'message'=>$validator->errors()], 401);            
-        } 
+        if ($validator->fails()) {
+            return response()->json(['error'=>true,'message'=>$validator->errors()], 401);
+        }
         if($req->permit)
         {
-            $validator = Validator::make($req->all(), [ 
+            $validator = Validator::make($req->all(), [
                'permit_name'=>'required',
             ]);
-            if ($validator->fails()) { 
-                return response()->json(['error'=>true,'message'=>$validator->errors()], 401);            
+            if ($validator->fails()) {
+                return response()->json(['error'=>true,'message'=>$validator->errors()], 401);
             }
-        } 
-        
+        }
+
         $res=new myaccount;
         $res->name=$req->name;
         $res->u_type=$req->type;
@@ -162,10 +191,10 @@ class logInContoller extends Controller
         $res->dob=date('Y-m-d',strtotime($req->dob));
         $res->gender=$req->gender;
         $res->date_time=date('Y-m-d H:i:s');
-        $res->save(); 
+        $res->save();
         if($req->permit)
         {
-            
+
             $pr=new permitModel;
             $pr->user_id=$res->id;
             $file=$req->file('permit');
@@ -175,6 +204,6 @@ class logInContoller extends Controller
             $pr->name=$req->permit_name;
             $pr->save();
         }
-          return response()->json(['error'=>false,'message'=>'Resource added successfully..'], 200); 
+          return response()->json(['error'=>false,'message'=>'Resource added successfully..'], 200);
     }
 }

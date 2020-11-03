@@ -15,13 +15,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();  
+    return $request->user();
 });
 Route::post('login', 'API\logInContoller@login');
+Route::post('login/social','API\logInContoller@socialLogin');
 Route::post('registration', 'API\logInContoller@register');
 route::get('user/profile/{uid}','API\logInContoller@profileView');
 route::post('user/profile/{uid}','API\logInContoller@update');
 route::post('user/password/reset','API\logInContoller@passReset');
+route::post('add/otherinfo/{uid}','API\logInContoller@addOtherInfo');
+route::get('user/info/{email}','API\userController@userInfo');
 
 route::post('User/attendence/new','API\attendenceController@create');
 route::post('User/attendence/update/{id}','API\attendenceController@update');
@@ -44,12 +47,16 @@ route::get('User/activities/show/{id}','API\activitiesController@show');
 route::get('User/activities/show/user/{id}','API\activitiesController@userShow');
 route::delete('User/activities/delete/{id}','API\activitiesController@delete');
 
+route::get('activity/response/{aid}','API\activitiesController@activityResponse');
+route::post('add/activity/response','API\activitiesController@addActivityResponse');
+route::post('update/activity/response/{arid}','API\activitiesController@updateActivityResponse');
+
 route::post('User/query/new','API\queriesController@create');
 route::post('User/query/update/{id}','API\queriesController@update');
 route::get('User/query/show/{id}','API\queriesController@show');
 route::get('User/query/show/user/{id}','API\queriesController@userShow');
 route::delete('User/query/delete/{id}','API\queriesController@delete');
-    
+
 route::get('dashboard/{id}','API\deshboardController@show');
 
 route::post('User/permit/new','API\permitController@create');
@@ -94,3 +101,10 @@ route::get('show/equipment/{fid}','API\equipmentController@show');
 route::delete('delete/equipment/{eid}','API\equipmentController@delete');
 
 route::post('add/resource','API\logInContoller@addResource');
+route::get('farmers/{uid}','API\userController@farmars');
+
+route::get('chat/user/{uid}','API\chatController@userList');
+
+route::post('upload/image','API\userController@uploadImage');
+
+route::post('chart/data','API\userController@chart');

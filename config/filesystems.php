@@ -81,7 +81,13 @@ return [
             'root' => public_path('permitPhotos'),
             'url' => env('APP_URL').'/permitPhotos',
             'visibility' => 'public',
-        ]
+        ],
+        'activity'=>[
+            'driver' => 'local',
+            'root' => public_path('activityResponse'),
+            'url' => env('APP_URL').'/activityResponse',
+            'visibility' => 'public',
+        ],
 
     ],
 

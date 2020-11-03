@@ -30,4 +30,16 @@ class ImageController extends Controller
             return view('welcome');
         }
     }
+    public function image($name)
+    {
+        $storagePath = public_path().'/extraImages/'.$name;
+
+        if(file_exists($storagePath))
+        {
+            return response()->file($storagePath);
+        }
+        else {
+            return view('welcome');
+        }
+    }
 }

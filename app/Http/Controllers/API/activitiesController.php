@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\activities;
 use Validator;
 use App\myaccount;
+use App\activityResponse;
+use Illuminate\Support\Facades\Storage;
 
 class activitiesController extends Controller
 {
@@ -30,11 +32,11 @@ class activitiesController extends Controller
     }
     public function create(Request $req)
     {
-        $validator = Validator::make($req->all(), [ 
-            'title' => 'required', 
-            'descr' => 'required', 
-            'activity_by' => 'required', 
-            'activity_to' => 'required', 
+        $validator = Validator::make($req->all(), [
+            'title' => 'required',
+            'descr' => 'required',
+            'activity_by' => 'required',
+            'activity_to' => 'required',
             'activity_date'=>'required',
             'activity_time'=>'required',
             'weather'=>'required',
@@ -44,8 +46,8 @@ class activitiesController extends Controller
             'image'=> 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
 
         ]);
-        if ($validator->fails()) { 
-            return response()->json(['error'=>$validator->errors()], 401);            
+        if ($validator->fails()) {
+            return response()->json(['error'=>$validator->errors()], 401);
         }
         if($req->hasfile('image'))
         {
@@ -69,6 +71,9 @@ class activitiesController extends Controller
         $activities->lat=$req->lat;
         $activities->longtitute=$req->logtitute;
         $activities->image=$name;
+        $activities->notes=$req->notes;
+        $activities->subActivities=$req->subActivities;
+        $activities->notes=$req->notes;
         if($activities->save())
         {
             return response()->json(['success'=>' Activity inserted Successfully'],200);
@@ -79,11 +84,11 @@ class activitiesController extends Controller
     }
     public function update(Request $req,$id)
     {
-        $validator = Validator::make($req->all(), [ 
-            'title' => 'required', 
-            'descr' => 'required', 
-            'activity_by' => 'required', 
-            'activity_to' => 'required', 
+        $validator = Validator::make($req->all(), [
+            'title' => 'required',
+            'descr' => 'required',
+            'activity_by' => 'required',
+            'activity_to' => 'required',
             'weather'=>'required',
             'elevation'=>'required',
             'lat'=>'required',
@@ -91,8 +96,8 @@ class activitiesController extends Controller
             'image'=> 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
 
         ]);
-        if ($validator->fails()) { 
-            return response()->json(['error'=>$validator->errors()], 401);            
+        if ($validator->fails()) {
+            return response()->json(['error'=>$validator->errors()], 401);
         }
         if($req->hasfile('image'))
         {
@@ -111,8 +116,11 @@ class activitiesController extends Controller
             'lat'=>$req->lat,
             'longtitute'=>$req->logtitute,
             'image'=>$req->image,
+            'location'=>$req->location,
+            'notes'=>$req->notes,
+            'subActivities'=>$req->subActivities,
         ];
-        
+
         $activities_update=activities::where('id',$id)->update($activities_data);
         if($activities_update==1)
         {
@@ -121,7 +129,7 @@ class activitiesController extends Controller
         else{
             return response()->json(['error'=>'Record not found'],500);
         }
-        
+
     }
     public function delete($id)
     {
@@ -136,7 +144,7 @@ class activitiesController extends Controller
     public function show2($id)
     {
          $uid=[$id];
-            $today['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('date',date('Y-m-d'))->select('activities.*')->get()->toarray();
+            $today['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('activity_to','!=',$id)->where('date',date('Y-m-d'))->select('activities.*')->get()->toarray();
             $att=array();
             while($uid){
                 $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
@@ -150,7 +158,7 @@ class activitiesController extends Controller
             $today['lowerLevel']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$att)->where('date',date('Y-m-d'))->select('activities.*')->get()->toarray();
 
             $uid=[$id];
-            $tomorrow['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('date',date("Y-m-d", strtotime("+1 day")))->select('activities.*')->get()->toarray();
+            $tomorrow['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('activity_to','!=',$id)->where('date',date("Y-m-d", strtotime("+1 day")))->select('activities.*')->get()->toarray();
             $att=array();
             while($uid){
                 $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
@@ -186,8 +194,60 @@ class activitiesController extends Controller
     {
          $date=date('Y-m-d',strtotime($date));
             $activities=myaccount::join('activities','activities.activity_by','my_account.user_id')->where('my_account.user_id',$uid)->where('date',$date)->select('activities.*')->get()->toarray();
-           
+
             return response()->json(['error'=>false,'activities'=>$activities],200);
     }
-
+    public function activityResponse($aid)
+    {
+        $ar=activityResponse::where('activity_id',$aid)->get()->toarray();
+        return response()->json(['error'=>false,'activity_response'=>$ar],200);
+    }
+    public function addActivityResponse(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'activity_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error'=>$validator->errors()], 401);
+        }
+        $name="";
+        if ($req->image) {
+            if ($req->hasfile('image')) {
+                $file=$req->file('image');
+                $name=time().".jpg";
+                $file->move(public_path().'/activityResponse/', $name);
+            }
+        }
+        $ar=new activityResponse;
+        $ar->activity_id=$req->activity_id;
+        $ar->subActivities=$req->subActivities;
+        $ar->image=$name;
+        $ar->remark=$ar->remark;
+        $ar->rating=$ar->rating;
+        $ar->save();
+        return response()->json(['error'=>false,'message'=>'Activity response added..'],200);
+    }
+    public function updateActivityResponse(Request $req,$id)
+    {
+        $ar=activityResponse::find($id);
+        $name="";
+            if ($req->image) {
+                $image=activityResponse::where('id',$id)->first();
+                if(Storage::disk('activity')->exists($image->image))
+                {
+                    Storage::disk('activity')->delete($image->image);
+                }
+                if ($req->hasfile('image')) {
+                    $file=$req->file('image');
+                    $name=time().".jpg";
+                    $file->move(public_path().'/activityResponse/', $name);
+                }
+                $ar->image=$name;
+            }
+        $ar->subActivities=$req->subActivities;
+        $ar->remark=$ar->remark;
+        $ar->rating=$ar->rating;
+        $ar->save();
+        return response()->json(['error'=>false,'message'=>'Activity response updated..'],200);
+    }
 }

@@ -20,3 +20,4 @@ Route::get('/', function () {
 Route::get('equiepment/{name}', 'ImageController@equ');
 Route::get('profile/{name}', 'ImageController@profile');
 Route::get('image/{name}', 'ImageController@image');
+Route::get('blog/{name}','ImageController@blog');

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\activities;
 use Validator;
 use App\myaccount;
+use App\farm;
 use App\activityResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -46,9 +48,15 @@ class activitiesController extends Controller
             'image'=> 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
 
         ]);
+
         if ($validator->fails()) {
             return response()->json(['error'=>$validator->errors()], 401);
         }
+        $response = Http::get('api.openweathermap.org/data/2.5/weather', [
+            'lat' => $req->lat,
+            'lon' => $req->logtitute,
+            'appid'=>'68e5fd7465f242db40ea574548292789'
+        ]);
         if($req->hasfile('image'))
         {
             $file=$req->file('image');
@@ -61,19 +69,30 @@ class activitiesController extends Controller
         // dd($req->activity_date);
         $activities->date=date('Y-m-d',strtotime($req->activity_date));
         $activities->time=date('H:i:s',strtotime($req->activity_time));
+        if($response->status()==200)
+        {
+            $activities->elevation=$response['main']['sea_level'];
+            $activities->temp=$response['main']['temp'];
+            $activities->weather=$response['weather'][0]['main'];
+        }
+        else{
+            $activities->elevation=$req->elevation;
+            $activities->weather=$req->weather;
+            $activities->temp=0;
+        }
         $activities->activity_by=$req->activity_by;
         $activities->activity_to=$req->activity_to;
         $activities->isComplete=0;
         $activities->isReassigned=0;
-        $activities->weather=$req->weather;
         $activities->remark=$req->remark;
-        $activities->elevation=$req->elevation;
         $activities->lat=$req->lat;
         $activities->longtitute=$req->logtitute;
         $activities->image=$name;
         $activities->notes=$req->notes;
         $activities->subActivities=$req->subActivities;
         $activities->notes=$req->notes;
+        $activities->location=$req->location;
+        $activities->rating=$req->rating;
         if($activities->save())
         {
             return response()->json(['success'=>' Activity inserted Successfully'],200);
@@ -144,7 +163,7 @@ class activitiesController extends Controller
     public function show2($id)
     {
          $uid=[$id];
-            $today['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('activity_to','!=',$id)->where('date',date('Y-m-d'))->select('activities.*')->get()->toarray();
+            $today['myActivities']=myaccount::join('activities','activities.activity_by','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('date',date('Y-m-d'))->select('activities.*')->get()->toarray();
             $att=array();
             while($uid){
                 $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
@@ -225,7 +244,7 @@ class activitiesController extends Controller
         $ar->remark=$ar->remark;
         $ar->rating=$ar->rating;
         $ar->save();
-        return response()->json(['error'=>false,'message'=>'Activity response added..'],200);
+        return response()->json(['error'=>false,'message'=>'Activity response added..','isComplete'=>1],200);
     }
     public function updateActivityResponse(Request $req,$id)
     {
@@ -245,9 +264,32 @@ class activitiesController extends Controller
                 $ar->image=$name;
             }
         $ar->subActivities=$req->subActivities;
-        $ar->remark=$ar->remark;
-        $ar->rating=$ar->rating;
+        $ar->remark=$req->remark;
+        $ar->rating=$req->rating;
         $ar->save();
         return response()->json(['error'=>false,'message'=>'Activity response updated..'],200);
+    }
+    public function activityInfo($uid)
+    {
+        $farmers=myaccount::select('user_id','name')->where([['report_to',$uid],['designation_id',3]])->get();
+        $farm=farm::where('uid',$uid)->get()->toarray();
+        $farm_work=\DB::table('farm_work')->get();
+        if($farm)
+        {
+            return response()->json(['error'=>false,'farms'=>$farm], 200);
+        }
+        return response()->json(['error'=>false,'farm'=>$farm,'farm_works'=>$farm_work,'farmers'=>$farmers],200);
+    }
+    public function allActivities($uid)
+    {
+        $activities=activities::where('activity_by',$uid)->orwhere('activity_to',$uid)->get();
+        foreach($activities as $ac)
+        {
+            $user=myaccount::where('user_id',$ac['activity_to'])->first();
+            $user2=myaccount::where('user_id',$ac['activity_by'])->first();
+            $ac->activity_to=$user->name;
+            $ac->activity_by=$user2->name;
+        }
+        return response()->json(['error'=>false,'activities'=>$activities],200);
     }
 }

@@ -51,4 +51,23 @@ class userController extends Controller
         $chart=activities::join('activity_response','activity_response.activity_id','activities.id')->whereIn('activity_to',$users)->where([['activity_response.created_at','>=',$req->from],['activity_response.created_at','<=',$req->to]])->get();
         return response()->json(['error'=>false,'chart'=>$chart],200);
     }
+    public function chart2(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'uid'=>'required',
+            'from'=>'required',
+            'to'=>'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error'=>$validator->errors()], 401);
+        }
+        $users=myaccount::select('user_id')->where('report_to',$req->uid)->get();
+        $chart=activities::whereIn('activity_to',$users)->where([['created_at','>=',$req->from],['created_at','<=',$req->to]])->get();
+        return response()->json(['error'=>false,'chart'=>$chart],200);
+    }
+    public function designations()
+    {
+        $designation=\DB::table('designation')->wherein('id',['3','5'])->get();
+        return response()->json(['error'=>false,'designation'=>$designation],200);
+    }
 }

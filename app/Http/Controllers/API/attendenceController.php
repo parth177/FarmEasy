@@ -16,26 +16,26 @@ class attendenceController extends Controller
         $attendence=attendence::where([['user_id',$id],['date',$today]])->get()->toarray()  ;
         if(!empty($attendence))
         {
-            return response()->json(['details'=>$attendence]); 
+            return response()->json(['details'=>$attendence]);
         }
         else{
-            return response()->json(['Error'=>'Attendence not available']); 
+            return response()->json(['Error'=>'Attendence not available']);
         }
     }
-    
+
     public function create(Request $req)
     {
-       
-        $validator = Validator::make($req->all(), [ 
-            'user_id' => 'required', 
-            'location' => 'required', 
-            'lat' => 'required', 
-            'lng' => 'required', 
+
+        $validator = Validator::make($req->all(), [
+            'user_id' => 'required',
+            'location' => 'required',
+            'lat' => 'required',
+            'lng' => 'required',
             'weather'=>'required',
             'type'=>'required'
         ]);
-        if ($validator->fails()) { 
-            return response()->json(['error'=>$validator->errors()], 401);            
+        if ($validator->fails()) {
+            return response()->json(['error'=>$validator->errors()], 401);
         }
         $attendence=new attendence;
         $attendence->user_id=$req->user_id;
@@ -56,17 +56,17 @@ class attendenceController extends Controller
     }
         public function update(Request $req,$id)
         {
-        
-            $validator = Validator::make($req->all(), [ 
-                'user_id' => 'required', 
-                'location' => 'required', 
-                'lat' => 'required', 
-                'lng' => 'required', 
+
+            $validator = Validator::make($req->all(), [
+                'user_id' => 'required',
+                'location' => 'required',
+                'lat' => 'required',
+                'lng' => 'required',
                 'weather'=>'required',
                 'type'=>'required'
             ]);
-            if ($validator->fails()) { 
-                return response()->json(['error'=>$validator->errors()], 401);            
+            if ($validator->fails()) {
+                return response()->json(['error'=>$validator->errors()], 401);
             }
             $attendence_data=[
                 'user_id'=>$req->user_id,
@@ -112,5 +112,50 @@ class attendenceController extends Controller
             }
             $attendence['lowerLevel']=myaccount::join('attendance','attendance.user_id','my_account.user_id')->whereIn('my_account.user_id',$att)->get()->toarray();
             return response()->json(['error'=>false,'attendence'=>$attendence]);
+        }
+        public function checkOut($uid)
+        {
+            $clockin=attendence::where([['user_id',$uid],['type','like','clock-in'],['date',date('Y-m-d')]])->first();
+            $clockout=attendence::where([['user_id',$uid],['type','like','clock-out'],['date',date('Y-m-d')]])->first();
+            if($clockin)
+            {
+                $clock_in_time=$clockin->time;
+                $clockin=true;
+
+            }
+            else{
+                $clockin=false;
+                $clock_in_time=null;
+            }
+            if($clockout)
+            {
+                $clock_out_time=$clockout->time;
+                $clockout=true;
+
+            }
+            else{
+                $clock_out_time=null;
+            }
+            return response()->json(['error'=>false,'clock_in'=>$clockin,'clock_in_time'=>$clock_in_time,'clock_out'=>$clockout,'clock_out_time'=>$clock_out_time],200);
+        }
+        public function attendenceDateWise($uid,$date)
+        {
+            $uid=[$uid];
+            $attendence['myAttendence']=myaccount::join('attendance','attendance.user_id','my_account.user_id')->whereIn('my_account.user_id',$uid)->where('date',$date)->get()->toarray();
+            $att=array();
+            while($uid){
+                $usr=myaccount::select('user_id')->whereIn('report_to',$uid)->get()->toarray();
+                $uid=null;
+                foreach($usr as $u)
+                {
+                    $uid[]=$u['user_id'];
+                    $att[]=$u['user_id'];
+                }
+            }
+            $attendence['lowerLevel']=myaccount::join('attendance','attendance.user_id','my_account.user_id')->whereIn('my_account.user_id',$att)->where('date',$date)->get()->toarray();
+            $total=count($att);
+            $present=myaccount::join('attendance','attendance.user_id','my_account.user_id')->whereIn('my_account.user_id',$att)->where([['date','like',$date],['type','like','clock-in']])->count();
+            $absent=$total-$present;
+            return response()->json(['error'=>false,'attendence'=>$attendence,'absent'=>$absent,'present'=>$present]);
         }
 }

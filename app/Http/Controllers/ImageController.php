@@ -42,4 +42,16 @@ class ImageController extends Controller
             return view('welcome');
         }
     }
+    public function blog($name)
+    {
+        $storagePath = public_path().'/blogImage/'.$name;
+
+        if(file_exists($storagePath))
+        {
+            return response()->file($storagePath);
+        }
+        else {
+            return view('welcome');
+        }
+    }
 }

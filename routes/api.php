@@ -25,13 +25,15 @@ route::post('user/profile/{uid}','API\logInContoller@update');
 route::post('user/password/reset','API\logInContoller@passReset');
 route::post('add/otherinfo/{uid}','API\logInContoller@addOtherInfo');
 route::get('user/info/{email}','API\userController@userInfo');
+route::get('designation','API\userController@designations');
 
 route::post('User/attendence/new','API\attendenceController@create');
 route::post('User/attendence/update/{id}','API\attendenceController@update');
 route::get('User/attendence/show/{id}','API\attendenceController@show');
 route::get('attendence/{uid}','API\attendenceController@attendence');
+route::get('attendence/{uid}/{date}','API\attendenceController@attendenceDateWise');
 route::delete('User/attendence/delete/{id}','API\attendenceController@delete');
-
+route::get('user/clock_out/{uid}','API\attendenceController@checkOut');
 
 route::post('blog/new','API\blogController@new');
 route::post('blog/update/{bid}','API\blogController@update');
@@ -41,10 +43,12 @@ route::get('blog/list/{uid}','API\blogController@show');
 route::post('User/activities/new','API\activitiesController@create');
 route::post('User/activities/update/{id}','API\activitiesController@update');
 route::get('activities/{uid}','API\activitiesController@show2');
+route::get('user/activities/info/{uid}','API\activitiesController@activityInfo');
 route::get('activities/{date}/{uid}','API\activitiesController@showdate');
 route::get('activities/self/{date}/{uid}','API\activitiesController@showdate2');
 route::get('User/activities/show/{id}','API\activitiesController@show');
 route::get('User/activities/show/user/{id}','API\activitiesController@userShow');
+route::get('show/all/activities/{uid}','API\activitiesController@allActivities');
 route::delete('User/activities/delete/{id}','API\activitiesController@delete');
 
 route::get('activity/response/{aid}','API\activitiesController@activityResponse');
@@ -94,6 +98,8 @@ route::post('output/update/{oid}','API\outputController@update');
 
 route::post('add/farm','API\farmController@new');
 route::post('view/farm/{uid}','API\farmController@show');
+route::post('update/farm/{fid}','API\farmController@update');
+route::delete('delete/farm/{fid}','API\farmController@delete');
 
 route::post('add/equipment','API\equipmentController@new');
 route::post('edit/equipment/{eid}','API\equipmentController@edit');
@@ -108,3 +114,4 @@ route::get('chat/user/{uid}','API\chatController@userList');
 route::post('upload/image','API\userController@uploadImage');
 
 route::post('chart/data','API\userController@chart');
+route::post('chart2/data','API\userController@chart2');

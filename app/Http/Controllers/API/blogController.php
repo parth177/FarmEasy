@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\blogModel;
 use Validator;
-use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\Storage;
 class blogController extends Controller
 {
     public function show($uid)
@@ -36,7 +36,7 @@ class blogController extends Controller
             if ($req->hasfile('image')) {
                 $file=$req->file('image');
                 $name=time().".jpg";
-                Storage::disk('blog')->put($name, $file);
+                $file->move(public_path().'/blogImage/', $name);
             }
         }
         $blog->image=$name;
@@ -68,7 +68,7 @@ class blogController extends Controller
                 if ($req->hasfile('image')) {
                     $file=$req->file('image');
                     $name=time().".jpg";
-                    Storage::disk('blog')->put($name, $file);
+                    $file->move(public_path().'/blogImage/', $name);
                 }
                 $blog->image=$name;
             }
